@@ -26,6 +26,7 @@ MANIFEST
 
 # Environments
 .env
+.venv/
 
 # Configuration
 config
