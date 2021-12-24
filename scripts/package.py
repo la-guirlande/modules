@@ -10,7 +10,7 @@ from os import path
 
 def start():
   """Starts the script."""
-  print('#----- Starting modules packaging -----#')
+  print('#----- Starting modules packaging -----#\n')
 
   Path('./archives').mkdir(exist_ok=True)
   for f in glob.glob('./archives/*.zip'):
