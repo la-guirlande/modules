@@ -18,6 +18,7 @@ subparsers = parser.add_subparsers(help='Sub commands', dest='sub_command')
 
 parser_start = subparsers.add_parser('start', help='Starts a module')
 parser_start.add_argument('module', type=str, choices=list(map(lambda t: t.name.lower(), project.ModuleType)), help='Module to start')
+parser_start.add_argument('-w', '--watch', type=bool, help='Watch module (auto-restart)', default=False)
 
 parser_package = subparsers.add_parser('package', help='Packaging modules')
 parser_package.add_argument('-a', '--all', help='Packages all modules')
@@ -27,7 +28,7 @@ args = parser.parse_args()
 match args.sub_command:
   case 'start':
     from scripts import start
-    start.start(args.module)
+    start.start(args.module, args.watch)
   case 'package':
     from scripts import package
     package.start()
