@@ -1,7 +1,7 @@
 import re
 import time
 from guirlande_hub_client_package import ghc
-from ..utils import color, project
+from modules.utils import color, project
 
 module = ghc.Module(project.ModuleType.LED_STRIP.value)
 current_color = color.Color(0, 0, 0)
