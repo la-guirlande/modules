@@ -18,30 +18,45 @@ def start():
 
   for type in project.ModuleType:
     type_name = type.name.lower()
-    print('Creating', type.name, 'archive')
     utils_path = path.join('modules', 'utils')
     module_path = path.join('modules', type_name)
     archive_path = path.join('archives', type_name + '.zip')
-    with zipfile.ZipFile(archive_path, 'x', zipfile.ZIP_STORED) as archive:
-      for f in glob.glob(utils_path + '/**/*', recursive=True):
-        if not f.startswith(path.join(utils_path, '__pycache__')):
-          final_path = 'utils/' + path.basename(f)
-          archive.write(f, final_path)
-          print('  Writing', final_path)
-      for f in glob.glob(module_path + '/**/*', recursive=True):
-        if not f.startswith(path.join(module_path, '.venv')) and not f.startswith(path.join(module_path, '__pycache__')):
-          final_path = type_name + '/' + path.basename(f)
-          archive.write(f, final_path)
-          print('  Writing', final_path)
-      main_path = 'main.py'
-      archive.writestr(main_path, 'from ' + type_name + ' import main\n')
-      print('  Writing', main_path)
 
-      print('  Testing archive')
-      test_result = archive.testzip()
-      if test_result:
-        print('    Test archive failed :', test_result)
-      else:
-        print('    Test archive success')
+    print('Creating', type.name, 'archive')
+    with zipfile.ZipFile(archive_path, 'x', zipfile.ZIP_STORED) as archive:
+      write_utils_module(archive, utils_path)
+      write_current_module(archive, type_name, module_path)
+      write_main_file(archive, type_name, 'main.py')
+      test_archive(archive)
       print('Created', type.name, 'archive in', archive.filename)
   print('#----- Modules packaging finished ! -----#')
+
+def write_utils_module(archive, utils_path):
+  """Writes utils module in archive."""
+  for f in glob.glob(utils_path + '/**/*', recursive=True):
+    if not f.startswith(path.join(utils_path, '__pycache__')):
+      final_path = 'utils/' + path.basename(f)
+      archive.write(f, final_path)
+      print('  Writing', final_path)
+
+def write_current_module(archive, type_name, module_path):
+  """Writes current module in archive."""
+  for f in glob.glob(module_path + '/**/*', recursive=True):
+    if not f.startswith(path.join(module_path, '.venv')) and not f.startswith(path.join(module_path, '__pycache__')):
+      final_path = type_name + '/' + path.basename(f)
+      archive.write(f, final_path)
+      print('  Writing', final_path)
+
+def write_main_file(archive, type_name, main_path):
+  """Writes main file in archive."""
+  archive.writestr(main_path, 'from ' + type_name + ' import main\n')
+  print('  Writing', main_path)
+
+def test_archive(archive):
+  """Tests archive."""
+  print('  Testing archive')
+  test_result = archive.testzip()
+  if test_result:
+    print('    Test archive failed :', test_result)
+  else:
+    print('    Test archive success')
