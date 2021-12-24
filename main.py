@@ -12,7 +12,7 @@ For more details, run `main.py -h`.
 import argparse
 from modules.utils import project
 
-parser = argparse.ArgumentParser(description='Module starter script')
+parser = argparse.ArgumentParser(description='Module management command')
 
 subparsers = parser.add_subparsers(help='Sub commands', dest='sub_command')
 
@@ -32,4 +32,4 @@ match args.sub_command:
     from scripts import package
     package.start()
   case _:
-    print('Unknown subcommand')
+    parser.print_help()
