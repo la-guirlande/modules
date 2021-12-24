@@ -31,8 +31,5 @@ MANIFEST
 # Configuration
 config
 
-# Testing
-test.py
-
 # Packaging
 archives/
