@@ -7,7 +7,6 @@ Available features :
 - `main.py package` : Packages all modules
 
 For more details, run `main.py -h`.
-
 """
 import argparse
 from modules.utils import project
