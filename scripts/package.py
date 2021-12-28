@@ -26,6 +26,7 @@ def start():
     with zipfile.ZipFile(archive_path, 'x', zipfile.ZIP_STORED) as archive:
       __write_utils_module(archive, utils_path)
       __write_current_module(archive, type_name, module_path)
+      __write_requirements_file(archive, 'requirements.txt')
       __write_main_file(archive, type_name, 'main.py')
       __test_archive(archive)
       print('Created', type.name, 'archive in', archive.filename)
@@ -46,6 +47,12 @@ def __write_current_module(archive, type_name, module_path):
       final_path = 'modules/' + type_name + '/' + path.basename(f)
       archive.write(f, final_path)
       print('  Writing', final_path)
+
+def __write_requirements_file(archive, requirement_path):
+  """Writes requirements.txt file in archive."""
+  final_path = 'requirements.txt'
+  archive.write(requirement_path, final_path)
+  print('  Writing', final_path)
 
 def __write_main_file(archive, type_name, main_path):
   """Writes main file in archive."""
