@@ -9,5 +9,5 @@ class ModuleType(Enum):
 
 class Paths(Enum):
   """Paths."""
-  BACKEND_URL = 'http://localhost'
+  API_URL = 'http://localhost'
   WEBSOCKET_URL = 'http://localhost:8000'

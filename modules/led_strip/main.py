@@ -1,9 +1,8 @@
 import re
 import time
-from guirlande_hub_client_package import ghc
-from modules.utils import color, project
+from modules.utils import ghc, color, project
 
-module = ghc.Module(project.ModuleType.LED_STRIP.value)
+module = ghc.Module(project.ModuleType.LED_STRIP.value, project.Paths.API_URL.value, project.Paths.WEBSOCKET_URL.value)
 current_color = color.Color(0, 0, 0)
 loop_run = False
 
@@ -64,8 +63,7 @@ def run_loop(loop):
             set_color(start_color.mix(end_color, mix))
 
 try:
-  module.connect(project.Paths.WEBSOCKET_URL.value)
-  module.register()
+  module.connect()
 except KeyboardInterrupt:
   module.disconnect()
   print('Disconnected')
