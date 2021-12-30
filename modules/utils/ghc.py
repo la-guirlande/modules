@@ -18,12 +18,17 @@ class Module:
     self.__token = config['token']
     self.socket = socketio.Client()
 
-    # When connected, updates the module registration status
+    # When connected, update module connection status
     @self.socket.on('module.connect')
     def __connect_listener(data):
       if data['status']:
         self.connected = True
         print('Module connected')
+    
+    # When disconnected, update module connection status
+    @self.socket.on('disconnect')
+    def __disconnect_listener():
+        self.disconnect()
     
     @self.socket.on('module.error')
     def __error_listener(data):
@@ -32,7 +37,7 @@ class Module:
   def connect(self, max_attempt = 50):
     """Connects the module websocket to the backend.
     
-    This method will freezes the current thread while the module is not connected. The thread is free when successful connection.
+    This method will blocks the current thread while the module is not connected. The thread is free when successful connection.
     
     If the module token is not set in the configuration file, this method will registers the module by calling API to `POST /modules/register` to gets a new token.
     This call will store this module in the backend but it will be set as not validated.
@@ -44,28 +49,39 @@ class Module:
     After a positive response on the same event, the module is officially connected (and obviously validated) to the backend and can communicate to the dedicated events.
     """
     self.socket.connect(self.__websocket_url)
-    print('Created websocket tunnel with the backend')
+    print('Connecting')
 
     if self.__token == '':
       print('No token, registering')
       self.__register()
-    
-    print('Connecting')
+      print('Registered with token', self.__token)
+
     attempt = 0
     while not self.connected and attempt < max_attempt:
       attempt += 1
-      print('Checking registration (attempt ' + str(attempt) + ')')
+      print('Checking connection (attempt ' + str(attempt) + ')')
       self.socket.emit('module.connect', { 'token': self.__token })
       time.sleep(5)
     
-    if self.connected:
-      self.socket.wait()
-    else:
-      print('Could not register the module, maximum attempts reached')
+    if not self.connected:
+      print('Could not connect the module, maximum attempts reached')
+  
+  def run_task(self, fc, *args):
+    """Runs a task in another thread."""
+    return self.socket.start_background_task(fc, *args)
+  
+  def wait(self):
+    """Waits until the connection between the module and the backend ends.
+    
+    This method will block the current thread. When the connection is lost, the thread is free.
+    """
+    self.socket.wait()
+    self.disconnect()
 
   def disconnect(self):
     """Disconnects the module websocket from the backend."""
     self.socket.disconnect()
+    self.connected = False
     print('Disconnected')
   
   def __register(self):
