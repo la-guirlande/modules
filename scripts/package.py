@@ -6,6 +6,7 @@ import zipfile
 import glob
 from pathlib import Path
 from modules.utils import project
+from templates import template
 from os import path
 
 def start():
@@ -27,10 +28,10 @@ def start():
       __write_utils_module(archive, utils_path)
       __write_current_module(archive, type_name, module_path)
       __write_requirements_file(archive, 'requirements.txt')
-      __write_main_file(archive, type_name, 'main.py')
+      __write_main_file(archive, type_name)
       __test_archive(archive)
       print('Created', type.name, 'archive in', archive.filename)
-  print('#----- Modules packaging finished ! -----#')
+  print('\n#----- Modules packaging finished ! -----#')
 
 def __write_utils_module(archive, utils_path):
   """Writes utils module in archive."""
@@ -54,10 +55,11 @@ def __write_requirements_file(archive, requirement_path):
   archive.write(requirement_path, final_path)
   print('  Writing', final_path)
 
-def __write_main_file(archive, type_name, main_path):
+def __write_main_file(archive, type_name):
   """Writes main file in archive."""
-  archive.writestr(main_path, 'from modules.' + type_name + ' import main\n')
-  print('  Writing', main_path)
+  final_path = 'main.py'
+  archive.writestr(final_path, template.compile('templates/main.template', { 'module_type': type_name }))
+  print('  Writing', final_path)
 
 def __test_archive(archive):
   """Tests archive."""
