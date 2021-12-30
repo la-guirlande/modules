@@ -19,14 +19,15 @@ def start(raw_type, watch=False):
   try:
     __run(type)
   except KeyboardInterrupt:
-    print('Stopping')
+    print('Manual stopping') # TODO Don't work on module.wait() and background tasks
   except Exception as err:
     print('Uncaught error while running module :', err)
     if watch:
       start(type.name, True) # FIXME Calling this function will freezes current call and may causes RAM overflow because the call stack gets bigger at every call
       return
 
-  print('#----- Shutting down module -----#')
+  print('\n#----- Shutting down module -----#')
+  exit(0)
 
 def __run(type):
   match type:
