@@ -115,7 +115,7 @@ class Module:
     """Sends data to a websocket event"""
     event_name = 'module.' + str(self.type) + '.' + event_name
     self.socket.emit(event_name, data)
-    print('Sended event %s', event_name)
+    print('Sended event', event_name)
   
   def __read_config(self):
     """Reads the configuration file."""
