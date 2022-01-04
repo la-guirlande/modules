@@ -5,7 +5,8 @@ from enum import Enum
 
 class ModuleType(Enum):
   """Module type."""
-  LED_STRIP = 0
+  TEST = 0
+  LED_STRIP = 1
 
 class Paths(Enum):
   """Paths."""

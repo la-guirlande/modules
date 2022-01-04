@@ -31,6 +31,8 @@ def start(raw_type, watch=False):
 
 def __run(type):
   match type:
+    case project.ModuleType.TEST:
+      from modules.test import main
     case project.ModuleType.LED_STRIP:
       from modules.led_strip import main
     case _:
