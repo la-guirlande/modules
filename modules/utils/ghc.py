@@ -73,14 +73,14 @@ class Module:
   def wait(self):
     """Waits until the connection between the module and the backend ends.
     
-    This method will block the current thread. When the connection is lost, the thread is free.
+    This method will block the current thread. When the connection is ended, the thread is free.
     """
     self.socket.wait()
-    self.disconnect()
 
   def disconnect(self):
     """Disconnects the module websocket from the backend."""
-    self.socket.disconnect()
+    if self.socket.connected:
+      self.socket.disconnect()
     self.connected = False
     print('Disconnected')
   
