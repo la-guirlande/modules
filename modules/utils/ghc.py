@@ -10,12 +10,13 @@ class Module:
   """Module class used to instantiate the module and communicate with the backend."""
 
   def __init__(self, type, api_url, websocket_url):
-    config = self.__read_config()
     self.type = type
+    self.__config_path = type.name.lower() + '.conf'
+    config = self.__read_config()
     self.__api_url = api_url
     self.__websocket_url = websocket_url
+    self.__token = config['TOKEN']
     self.connected = False
-    self.__token = config['token']
     self.socket = socketio.Client()
 
     # When connected, update module connection status
@@ -90,9 +91,9 @@ class Module:
     This method will send a `POST /modules/register` to register the module.
     The returned token is stored in the configuration file.
     """
-    res = requests.post(self.__api_url + '/modules', { 'type': self.type })
+    res = requests.post(self.__api_url + '/modules', { 'type': self.type.value })
     self.__token = res.json()['token']
-    self.__write_config('token', self.__token)
+    self.__write_config('TOKEN', self.__token)
   
   def listening(self, event_name):
     """Listening on a websocket event.
@@ -107,13 +108,13 @@ class Module:
     ```
     """
     def inner(fc):
-      self.socket.on('module.' + str(self.type) + '.' + event_name, fc)
+      self.socket.on('module.' + str(self.type.value) + '.' + event_name, fc)
       return fc
     return inner
 
   def send(self, event_name, data):
     """Sends data to a websocket event"""
-    event_name = 'module.' + str(self.type) + '.' + event_name
+    event_name = 'module.' + str(self.type.value) + '.' + event_name
     self.socket.emit(event_name, data)
     print('Sended event', event_name)
   
@@ -121,14 +122,14 @@ class Module:
     """Reads the configuration file."""
     try:
       config = {}
-      with open('config') as f:
+      with open(self.__config_path) as f:
         for line in f.readlines():
           items = line.split('=')
           config[items[0]] = items[1]
       return config
     except FileNotFoundError:
       print('Creating configuration file')
-      self.__create_config({ 'token': '' })
+      self.__create_config({ 'TOKEN': '' })
       return self.__read_config() # Recursive if file not created
   
   def __create_config(self, config):
@@ -136,7 +137,7 @@ class Module:
     
     This method will erase current configuration file if exists.
     """
-    with open('config', 'w') as f:
+    with open(self.__config_path, 'w') as f:
       for key, value in config.items():
         f.write(key + '=' + value)
   

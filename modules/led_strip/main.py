@@ -2,7 +2,7 @@ import re
 import time
 from modules.utils import ghc, color, project
 
-module = ghc.Module(project.ModuleType.LED_STRIP.value, project.Paths.API_URL.value, project.Paths.WEBSOCKET_URL.value)
+module = ghc.Module(project.ModuleType.LED_STRIP, project.Paths.API_URL.value, project.Paths.WEBSOCKET_URL.value)
 current_color = color.Color(0, 0, 0)
 current_loop = []
 
@@ -37,9 +37,9 @@ def load_loop(loop_data):
   return loop
 
 def loop():
-  while current_loop:
+  while current_loop and module.connected:
     for part in current_loop:
-      if not current_loop:
+      if not current_loop or not module.connected:
         break
       match part['type']:
         case 'c':
@@ -52,7 +52,7 @@ def loop():
           start_color = current_color.copy()
           end_color = color.Color(part['data'][0], part['data'][1], part['data'][2])
           while now < next:
-            if not current_loop:
+            if not current_loop or not module.connected:
               break
             now = time.time() * 1000
             mix = abs(((next - now) / part['data'][3]) - 1)
