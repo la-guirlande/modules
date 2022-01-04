@@ -90,7 +90,7 @@ class Module:
     This method will send a `POST /modules/register` to register the module.
     The returned token is stored in the configuration file.
     """
-    res = requests.post(self.__api_url + '/modules/register', { 'type': self.type })
+    res = requests.post(self.__api_url + '/modules', { 'type': self.type })
     self.__token = res.json()['token']
     self.__write_config('token', self.__token)
   
