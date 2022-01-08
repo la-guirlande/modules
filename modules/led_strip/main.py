@@ -1,10 +1,28 @@
 import re
 import time
 from modules.utils import ghc, color, project
+try:
+  import RPi.GPIO as GPIO
+  is_gpio = True
+except Exception:
+  is_gpio = False
+  print('Running module without GPIO')
 
 module = ghc.Module(project.ModuleType.LED_STRIP, project.Paths.API_URL.value, project.Paths.WEBSOCKET_URL.value)
 current_color = color.Color(0, 0, 0)
 current_loop = []
+
+if is_gpio:
+  GPIO.setmode(GPIO.BCM)
+  GPIO.setup(24, GPIO.OUT)
+  GPIO.setup(27, GPIO.OUT)
+  GPIO.setup(10, GPIO.OUT)
+  pwm_r = GPIO.PWM(24, 100)
+  pwm_g = GPIO.PWM(27, 100)
+  pwm_b = GPIO.PWM(10, 100)
+  pwm_r.start(0)
+  pwm_g.start(0)
+  pwm_b.start(0)
 
 @module.listening('color')
 def color_listener(data):
@@ -60,8 +78,17 @@ def loop():
 
 def set_color(color):
   current_color.set_color(color)
-  print(color.to_array())
-  # TODO PWM write here
+  # print(color.to_array())
+  if is_gpio:
+    pwm_r.ChangeDutyCycle(color.r * (100 / 255))
+    pwm_g.ChangeDutyCycle(color.g * (100 / 255))
+    pwm_b.ChangeDutyCycle(color.b * (100 / 255))
 
 module.connect()
 module.wait()
+
+if is_gpio:
+  pwm_r.stop()
+  pwm_g.stop()
+  pwm_b.stop()
+  GPIO.cleanup()
