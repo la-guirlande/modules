@@ -29,7 +29,7 @@ MANIFEST
 .venv/
 
 # Configuration
-config
+*.conf
 
 # Packaging
 archives/

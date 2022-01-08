@@ -7,4 +7,3 @@ python-socketio==5.5.0
 requests==2.26.0
 urllib3==1.26.7
 websocket-client==1.2.3
-RPi.GPIO==0.7.0

@@ -1,6 +1,6 @@
 from modules.utils import ghc, project
 
-module = ghc.Module(project.ModuleType.TEST.value, project.Paths.API_URL.value, project.Paths.WEBSOCKET_URL.value)
+module = ghc.Module(project.ModuleType.TEST, project.Paths.API_URL.value, project.Paths.WEBSOCKET_URL.value)
 
 @module.listening('data')
 def data_listener(data):
