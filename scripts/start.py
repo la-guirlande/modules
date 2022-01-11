@@ -35,5 +35,7 @@ def __run(type):
       from modules.test import main
     case project.ModuleType.LED_STRIP:
       from modules.led_strip import main
+    case project.ModuleType.MAGASIN:
+      from modules.magasin import main
     case _:
       print('Unknown type', type.name)
