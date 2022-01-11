@@ -7,7 +7,6 @@ Available features :
 - `main.py package` : Packages all modules
 
 For more details, run `main.py -h`.
-
 """
 import argparse
 from modules.utils import project
@@ -25,12 +24,13 @@ parser_package.add_argument('-a', '--all', help='Packages all modules')
 
 args = parser.parse_args()
 
-match args.sub_command:
-  case 'start':
-    from scripts import start
-    start.start(args.module, args.watch)
-  case 'package':
-    from scripts import package
-    package.start()
-  case _:
-    parser.print_help()
+if __name__ == '__main__':
+  match args.sub_command:
+    case 'start':
+      from scripts import start
+      start.start(args.module, args.watch)
+    case 'package':
+      from scripts import package
+      package.start()
+    case _:
+      parser.print_help()

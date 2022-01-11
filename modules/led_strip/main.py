@@ -1,32 +1,45 @@
 import re
 import time
-from guirlande_hub_client_package import ghc
-from modules.utils import color, project
+from modules.utils import ghc, color, project
+try:
+  import RPi.GPIO as GPIO
+  is_gpio = True
+except Exception:
+  is_gpio = False
+  print('Running module without GPIO')
 
-module = ghc.Module(project.ModuleType.LED_STRIP.value)
+module = ghc.Module(project.ModuleType.LED_STRIP, project.Paths.API_URL.value, project.Paths.WEBSOCKET_URL.value)
 current_color = color.Color(0, 0, 0)
-loop_run = False
+current_loop = []
 
-def set_color(color):
-  current_color.set_color(color)
-  # TODO PWM write here
+if is_gpio:
+  GPIO.setmode(GPIO.BCM)
+  GPIO.setup(24, GPIO.OUT)
+  GPIO.setup(27, GPIO.OUT)
+  GPIO.setup(10, GPIO.OUT)
+  pwm_r = GPIO.PWM(24, 100)
+  pwm_g = GPIO.PWM(27, 100)
+  pwm_b = GPIO.PWM(10, 100)
+  pwm_r.start(0)
+  pwm_g.start(0)
+  pwm_b.start(0)
 
 @module.listening('color')
 def color_listener(data):
-  global loop_run
-  loop_run = False
-  set_color(color.Color(data['red'], data['green'], data['blue']))
+  global current_loop
+  current_loop = []
+  c = color.Color(data['red'], data['green'], data['blue'])
+  print(' > Event "color" received :', c.to_array())
+  set_color(c)
 
 @module.listening('loop')
 def loop_listener(data):
-  global loop_run
-  loop_run = False
-  print('Stopped loop')
+  global current_loop
+  current_loop = []
   if 'loop' in data:
-    loop = load_loop(data['loop'])
-    loop_run = True
-    print('Started loop')
-    run_loop(loop)
+    current_loop = load_loop(data['loop'])
+    print(' > Event "loop" received :', current_loop)
+    loop()
 
 def load_loop(loop_data):
   loop = []
@@ -41,11 +54,11 @@ def load_loop(loop_data):
       print('Invalid part :', part)
   return loop
 
-def run_loop(loop):
-  while loop_run:
-    for part in loop:
-      if not loop_run:
-        return
+def loop():
+  while current_loop and module.connected:
+    for part in current_loop:
+      if not current_loop or not module.connected:
+        break
       match part['type']:
         case 'c':
           set_color(color.Color(part['data'][0], part['data'][1], part['data'][2]))
@@ -57,15 +70,25 @@ def run_loop(loop):
           start_color = current_color.copy()
           end_color = color.Color(part['data'][0], part['data'][1], part['data'][2])
           while now < next:
-            if not loop_run:
-              return
+            if not current_loop or not module.connected:
+              break
             now = time.time() * 1000
             mix = abs(((next - now) / part['data'][3]) - 1)
             set_color(start_color.mix(end_color, mix))
 
-try:
-  module.connect(project.Paths.WEBSOCKET_URL.value)
-  module.register()
-except KeyboardInterrupt:
-  module.disconnect()
-  print('Disconnected')
+def set_color(color):
+  current_color.set_color(color)
+  # print(color.to_array())
+  if is_gpio:
+    pwm_r.ChangeDutyCycle(color.r * (100 / 255))
+    pwm_g.ChangeDutyCycle(color.g * (100 / 255))
+    pwm_b.ChangeDutyCycle(color.b * (100 / 255))
+
+module.connect()
+module.wait()
+
+if is_gpio:
+  pwm_r.stop()
+  pwm_g.stop()
+  pwm_b.stop()
+  GPIO.cleanup()
