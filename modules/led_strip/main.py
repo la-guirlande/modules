@@ -75,6 +75,7 @@ def loop():
             now = time.time() * 1000
             mix = abs(((next - now) / part['data'][3]) - 1)
             set_color(start_color.mix(end_color, mix))
+            time.sleep(0.01)
 
 def set_color(color):
   current_color.set_color(color)
