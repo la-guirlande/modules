@@ -7,6 +7,7 @@ class ModuleType(Enum):
   """Module type."""
   TEST = 0
   LED_STRIP = 1
+  WEATHER = 2
 
 class Paths(Enum):
   """Paths."""
